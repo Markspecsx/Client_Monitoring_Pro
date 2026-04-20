@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>EllazoMonitor Pro – Business Dashboard</title>
+<meta name="description" content="Business monitoring dashboard – client sales, expenses, and debt tracking with live analytics."/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D1117;
+  --card:#161B22;
+  --card2:#1c2336;
+  --accent:#1F4E78;
+  --accent2:#2563a8;
+  --positive:#238636;
+  --pos-lt:#2ea043;
+  --negative:#F85149;
+  --text:#E6EDF3;
+  --muted:#8B949E;
+  --muted2:#9ca3af;
+  --border:#30363D;
+  --input:#21262D;
+  --blue:#388bfd;
+  --r:10px; --rs:6px;
+}
+html,body{min-height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:13.5px}
+
+/* ─── TOP BAR ─── */
+.top-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;height:50px;
+  background:var(--card);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:300;
+}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:0.92rem}
+.brand-logo{
+  width:26px;height:26px;border-radius:5px;
+  background:linear-gradient(135deg,#1F4E78,#388bfd);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;font-size:0.7rem;letter-spacing:-0.02em;
+}
+.hdr-date{font-size:0.7rem;color:var(--muted);margin-left:10px}
+.top-acts{display:flex;gap:7px}
+
+/* ─── BUTTONS ─── */
+.btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 13px;border-radius:var(--rs);border:1px solid transparent;
+  font-size:0.73rem;font-weight:600;cursor:pointer;
+  font-family:inherit;transition:all .15s ease;letter-spacing:0.01em;
+}
+.btn-ol{background:transparent;color:var(--muted);border-color:var(--border)}
+.btn-ol:hover{background:rgba(255,255,255,0.06);color:var(--text)}
+.btn-red{background:rgba(248,81,73,0.1);color:#f87171;border-color:rgba(248,81,73,0.28)}
+.btn-red:hover{background:rgba(248,81,73,0.2)}
+.btn-blue{background:rgba(56,139,253,0.1);color:#79b9fd;border-color:rgba(56,139,253,0.26)}
+.btn-blue:hover{background:rgba(56,139,253,0.18)}
+.btn-green{background:rgba(35,134,54,0.1);color:#3fb950;border-color:rgba(35,134,54,0.26)}
+.btn-green:hover{background:rgba(35,134,54,0.2)}
+.btn-acc{background:var(--accent);color:#fff;border-color:rgba(255,255,255,0.1)}
+.btn-acc:hover{background:var(--accent2)}
+.btn-del{background:transparent;border:none;color:var(--muted);cursor:pointer;padding:3px 7px;
+  font-size:0.75rem;font-family:inherit;transition:color .14s;line-height:1}
+.btn-del:hover{color:var(--negative)}
+.btn-prof{
+  background:rgba(56,139,253,0.08);border:1px solid rgba(56,139,253,0.22);
+  color:#79b9fd;border-radius:4px;padding:3px 8px;
+  font-size:0.67rem;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:all .14s;white-space:nowrap;
+}
+.btn-prof:hover{background:rgba(56,139,253,0.18)}
+
+/* ─── TABS ─── */
+.nav-wrap{background:var(--card);border-bottom:1px solid var(--border);padding:12px 24px 0}
+.nav-tabs{
+  display:flex;gap:2px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:8px;padding:3px;
+  width:fit-content;
+}
+.tab-btn{
+  padding:7px 20px;border-radius:6px;border:none;
+  background:transparent;color:var(--muted);
+  font-size:0.75rem;font-weight:500;cursor:pointer;
+  font-family:inherit;display:flex;align-items:center;gap:6px;
+  transition:all .18s;white-space:nowrap;
+}
+.tab-btn:hover:not(.active){background:rgba(255,255,255,0.05);color:var(--text)}
+.tab-btn.active{
+  background:linear-gradient(135deg,#1F4E78,#2563a8);color:#fff;
+  font-weight:600;box-shadow:0 2px 10px rgba(31,78,120,0.4);
+}
+
+/* ─── PANELS ─── */
+.pw{max-width:980px;margin:0 auto;padding:22px 18px 70px}
+.panel{display:none}
+.panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.panel.active>*{animation:fadeUp .28s ease both}
+
+/* ─── METRIC CARDS ─── */
+.m-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:18px}
+.m-grid-7{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px}
+@media(max-width:900px){.m-grid-7{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.m-grid-7{grid-template-columns:1fr}}
+
+/* ─── SUPPLIER TAB ─── */
+.sp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:800px){.sp-grid{grid-template-columns:1fr}}
+.sp-progress-wrap{background:rgba(255,255,255,0.06);border-radius:30px;height:5px;margin-top:4px;overflow:hidden}
+.sp-progress-bar{height:5px;border-radius:30px;background:linear-gradient(90deg,#238636,#3fb950);transition:width .4s ease}
+.sp-progress-bar.danger{background:linear-gradient(90deg,#F85149,#ffa07a)}
+.td-sup-rem{font-weight:700}
+.m-card.g::after{background:linear-gradient(90deg,#f59e0b,#fb923c)}
+.col-o{color:#fb923c}
+.m-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;
+  position:relative;overflow:hidden;transition:transform .2s;cursor:default;
+}
+.m-card:hover{transform:translateY(-2px)}
+.m-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.m-card.a::after{background:linear-gradient(90deg,var(--blue),#58a6ff)}
+.m-card.b::after{background:linear-gradient(90deg,var(--negative),#ffa07a)}
+.m-card.c::after{background:linear-gradient(90deg,var(--positive),#3fb950)}
+.m-card.d::after{background:linear-gradient(90deg,#8b5cf6,#c084fc)}
+.m-card.e::after{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.m-card.f::after{background:linear-gradient(90deg,#ec4899,#f472b6)}
+.ml{font-size:0.61rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.mv{font-size:1.5rem;font-weight:700;line-height:1;margin-bottom:3px;transition:color .3s}
+.ms{font-size:0.66rem;color:var(--muted)}
+.col-b{color:#58a6ff} .col-r{color:var(--negative)} .col-g{color:var(--pos-lt)}
+.col-p{color:#a78bfa} .col-a{color:#fbbf24} .col-pk{color:#f472b6}
+
+/* ─── CHARTS ─── */
+.ch-row{display:grid;grid-template-columns:1.3fr 1fr;gap:11px;margin-bottom:11px}
+.ch-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.ch-title{font-size:0.78rem;font-weight:600;margin-bottom:1px}
+.ch-sub{font-size:0.66rem;color:var(--muted);margin-bottom:13px}
+.ch-h{position:relative;height:190px}
+.ch-h2{position:relative;height:160px}
+
+/* ─── CLIENT ANALYTICS STRIP ─── */
+.cl-analytics{
+  display:grid;
+  grid-template-columns:1.4fr 1fr 0.9fr;
+  gap:12px;
+  margin-bottom:18px;
+}
+.cl-analytics .ch-card{
+  border-top:2px solid transparent;
+  transition:transform .2s,box-shadow .2s;
+}
+.cl-analytics .ch-card:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(0,0,0,0.35)}
+.cl-analytics .ch-card:nth-child(1){border-top-color:#388bfd}
+.cl-analytics .ch-card:nth-child(2){border-top-color:#3fb950}
+.cl-analytics .ch-card:nth-child(3){border-top-color:#a78bfa}
+.cl-an-h{position:relative;height:165px}
+@media(max-width:800px){.cl-analytics{grid-template-columns:1fr}}
+@media(max-width:500px){.cl-an-h{height:140px}}
+
+/* ─── SECTION CARDS ─── */
+.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+.sc-head{
+  padding:13px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+.sc-head h2{font-size:0.82rem;font-weight:600}
+.sc-head p{font-size:0.67rem;color:var(--muted);margin-top:2px}
+.sc-foot{
+  padding:10px 18px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  background:rgba(28,35,54,0.5);
+}
+.sc-tot{font-size:0.8rem;font-weight:700;color:var(--pos-lt)}
+
+/* ─── PAGINATION ─── */
+.pg-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 18px;border-top:1px solid var(--border);background:rgba(28,35,54,0.5);flex-wrap:wrap;gap:8px}
+.pg-info{font-size:0.67rem;color:var(--muted)}
+.pg-btns{display:flex;align-items:center;gap:6px}
+.pg-num{font-size:0.68rem;color:var(--muted);min-width:80px;text-align:center}
+.pg-btn{padding:3px 10px!important;font-size:0.68rem!important;line-height:1.5!important}
+.pg-btn[disabled]{opacity:0.32;pointer-events:none}
+
+/* ─── TABLES ─── */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.77rem}
+thead th{
+  padding:9px 12px;text-align:left;
+  font-size:0.61rem;font-weight:600;letter-spacing:0.07em;
+  text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--border);
+  background:rgba(31,78,120,0.1);white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid rgba(48,54,61,0.45);transition:background .1s}
+tbody tr:hover{background:rgba(56,139,253,0.04)}
+tbody tr:last-child{border-bottom:none}
+td{padding:8px 12px;vertical-align:middle}
+tfoot td{
+  padding:10px 12px;font-size:0.77rem;font-weight:700;
+  border-top:1px solid var(--border);
+  background:rgba(28,35,54,0.7);
+  color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;
+}
+.tf-val{color:var(--pos-lt)!important;font-size:0.84rem}
+
+/* ─── TABLE INPUTS ─── */
+td input,td select{
+  background:var(--input);color:var(--text);
+  border:1px solid rgba(48,54,61,0.8);
+  border-radius:4px;padding:4px 7px;
+  font-size:0.75rem;font-family:inherit;width:100%;
+  outline:none;transition:border-color .15s,box-shadow .15s;
+}
+td input:focus,td select:focus{
+  border-color:rgba(31,78,120,0.65);
+  box-shadow:0 0 0 3px rgba(31,78,120,0.18);
+}
+td input[type=date]{min-width:118px}
+td input[type=number]{min-width:80px;text-align:right}
+td input[type=text]{min-width:90px}
+.ro{color:var(--muted);font-size:0.7rem;font-weight:600;letter-spacing:0.04em;white-space:nowrap}
+.td-net{color:var(--pos-lt);font-weight:700}
+.td-neg{color:var(--negative);font-weight:700}
+.td-rem{font-weight:700}
+.act-c{display:flex;gap:5px;align-items:center}
+
+/* ─── BADGES ─── */
+.badge{display:inline-flex;padding:2px 7px;border-radius:20px;font-size:0.63rem;font-weight:600;white-space:nowrap;line-height:1.4}
+.b-new{background:rgba(139,148,158,0.12);color:#8b949e;border:1px solid rgba(139,148,158,0.24)}
+.b-ret{background:rgba(56,139,253,0.1);color:#79b9fd;border:1px solid rgba(56,139,253,0.24)}
+.b-loy{background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.26)}
+.b-vip{
+  background:linear-gradient(135deg,rgba(139,92,246,0.18),rgba(192,132,252,0.12));
+  color:#c4b5fd;border:1px solid rgba(139,92,246,0.3);
+  box-shadow:0 0 8px rgba(139,92,246,0.15);
+}
+
+/* ─── PANEL HEADER ─── */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.ph h1{font-size:0.98rem;font-weight:700;margin-bottom:2px}
+.ph p{font-size:0.71rem;color:var(--muted)}
+.ph-acts{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+
+/* ─── PROFILE DRAWER ─── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.5);
+  z-index:400;opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.overlay.open{opacity:1;pointer-events:all}
+.drawer{
+  position:fixed;right:0;top:0;bottom:0;width:330px;
+  background:var(--card);border-left:1px solid var(--border);
+  z-index:401;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+.drawer.open{transform:translateX(0)}
+.dr-head{
+  padding:16px 20px 13px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:var(--card);z-index:1;
+}
+.dr-head span{font-size:0.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em}
+.dr-close{background:transparent;border:none;color:var(--muted);cursor:pointer;
+  font-size:1.1rem;padding:2px;transition:color .14s;line-height:1}
+.dr-close:hover{color:var(--text)}
+.dr-body{padding:18px 20px;flex:1}
+.dr-avatar{
+  width:54px;height:54px;border-radius:50%;margin-bottom:13px;
+  background:linear-gradient(135deg,var(--accent),var(--blue));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;font-weight:800;color:#fff;
+}
+.dr-name{font-size:1.05rem;font-weight:700;margin-bottom:2px}
+.dr-id{font-size:0.7rem;color:var(--muted);margin-bottom:8px}
+.dr-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+.dr-stat{
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:7px;padding:10px 12px;
+}
+.dr-sl{font-size:0.59rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:4px}
+.dr-sv{font-size:0.95rem;font-weight:700}
+.dr-txns{margin-top:16px}
+.dr-txns h4{font-size:0.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px}
+.dr-txn{
+  padding:8px 10px;border-radius:6px;
+  background:rgba(255,255,255,0.025);border:1px solid rgba(48,54,61,0.5);
+  margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;
+}
+.dr-tl{font-size:0.71rem}
+.dr-td{color:var(--muted);font-size:0.66rem;margin-top:1px}
+.dr-ta{font-size:0.76rem;font-weight:700;color:var(--pos-lt)}
+
+/* ─── TOAST ─── */
+#toast{
+  position:fixed;bottom:18px;right:18px;
+  background:var(--card);border:1px solid rgba(35,134,54,0.35);
+  color:#3fb950;padding:8px 14px;border-radius:7px;
+  font-size:0.74rem;font-weight:600;
+  opacity:0;transform:translateY(6px);
+  transition:opacity .22s,transform .22s;z-index:9999;pointer-events:none;
+}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#484f58}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:800px){
+  .m-grid{grid-template-columns:repeat(2,1fr)}
+  .ch-row{grid-template-columns:1fr}
+  .nav-tabs{overflow-x:auto;max-width:calc(100vw - 48px)}
+  .nav-wrap{overflow-x:auto}
+  .drawer{width:100%;max-width:380px}
+}
+@media(max-width:500px){
+  .m-grid{grid-template-columns:1fr}
+  .top-bar{padding:0 12px}
+  .mv{font-size:1.25rem}
+  .pw{padding:14px 10px 60px}
+}
+/* ─── PRINT VIEW (hidden on screen) ─── */
+#print-view{display:none}
+
+@media print{
+  /* Hide everything except the print view */
+  body > *:not(#print-view){display:none!important}
+  #print-view{
+    display:block!important;
+    font-family:'Inter',Arial,sans-serif;
+    background:#fff;color:#111;
+    padding:28px 32px;
+    font-size:11px;
+    line-height:1.5;
+  }
+
+  /* ── Header ── */
+  .pv-brand{
+    text-align:center;
+    font-size:10px;
+    color:#555;
+    letter-spacing:0.12em;
+    margin-bottom:4px;
+  }
+  .pv-brand::before{content:'— ';}
+  .pv-brand::after{content:' —';}
+  .pv-title{
+    text-align:center;
+    font-size:22px;
+    font-weight:800;
+    color:#1a5e2a;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin-bottom:14px;
+  }
+  .pv-meta{
+    display:flex;
+    gap:48px;
+    margin-bottom:22px;
+    font-size:12px;
+  }
+  .pv-meta span{border-bottom:1px solid #333;min-width:160px;display:inline-block;padding-bottom:1px}
+
+  /* ── Section headings ── */
+  .pv-section-title{
+    font-size:15px;
+    font-weight:700;
+    color:#111;
+    margin:18px 0 6px;
+    border-bottom:2px solid #1a5e2a;
+    padding-bottom:3px;
+  }
+
+  /* ── Tables ── */
+  .pv-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:8px;
+    font-size:11px;
+  }
+  .pv-table th{
+    background:#e8f0e9;
+    border:1px solid #aaa;
+    padding:5px 8px;
+    text-align:left;
+    font-weight:700;
+    font-size:10.5px;
+  }
+  .pv-table td{
+    border:1px solid #bbb;
+    padding:4px 8px;
+  }
+  .pv-table td.num{text-align:right;font-weight:600}
+  .pv-table tr.total-row td{
+    background:#f3f8f3;
+    font-weight:700;
+    border-top:2px solid #1a5e2a;
+  }
+  .pv-table .badge-new{color:#555}
+  .pv-table .badge-ret{color:#1F4E78;font-weight:600}
+  .pv-table .badge-loy{color:#a05c00;font-weight:600}
+  .pv-table .badge-vip{color:#6b21a8;font-weight:700}
+
+  /* ── Summary grid ── */
+  .pv-summary-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin-top:18px;
+  }
+  .pv-sum-box{
+    border:1px solid #aaa;
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .pv-sum-head{
+    background:#e8f0e9;
+    font-weight:700;
+    font-size:11.5px;
+    padding:5px 10px;
+    border-bottom:1px solid #aaa;
+  }
+  .pv-sum-row{
+    display:flex;
+    justify-content:space-between;
+    padding:4px 10px;
+    border-bottom:1px solid #e0e0e0;
+    font-size:11px;
+  }
+  .pv-sum-row:last-child{border-bottom:none}
+  .pv-sum-row .val{font-weight:700;color:#1a5e2a}
+  .pv-sum-row .val-r{font-weight:700;color:#b91c1c}
+
+  /* ── Footer ── */
+  .pv-footer{
+    text-align:center;
+    margin-top:24px;
+    font-size:9.5px;
+    color:#888;
+    border-top:1px solid #ddd;
+    padding-top:8px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TOP BAR ══ -->
+<header class="top-bar">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="brand">
+      <div class="brand-logo">E</div>
+      EllazoMonitor Pro
+    </div>
+    <span class="hdr-date" id="hdr-date"></span>
+  </div>
+  <div class="top-acts">
+    <button class="btn btn-ol" id="btn-print">🖨 Print</button>
+    <button class="btn btn-red" id="btn-reset">↺ Reset Data</button>
+  </div>
+</header>
+
+<!-- ══ TABS ══ -->
+<div class="nav-wrap">
+  <div class="nav-tabs">
+    <button class="tab-btn active" data-tab="dash">⊞ Dashboard</button>
+    <button class="tab-btn" data-tab="clients">👥 Client Sales</button>
+    <button class="tab-btn" data-tab="expenses">💸 Expenses</button>
+    <button class="tab-btn" data-tab="debts">🔁 Debts</button>
+    <button class="tab-btn" data-tab="supplier">🏭 Supplier Payments</button>
+  </div>
+</div>
+
+<main class="pw">
+
+<!-- ══════════════════════════════
+     DASHBOARD
+══════════════════════════════ -->
+<div class="panel active" id="panel-dash">
+
+  <!-- 7 Metric Cards -->
+  <div class="m-grid-7">
+    <div class="m-card a">
+      <div class="ml">Total Sales</div>
+      <div class="mv col-b" id="m-sales">₱0</div>
+      <div class="ms">Sum of all Net Sales</div>
+    </div>
+    <div class="m-card b">
+      <div class="ml">Total Expenses</div>
+      <div class="mv col-r" id="m-exp">₱0</div>
+      <div class="ms">Sum of all payments out</div>
+    </div>
+    <div class="m-card c">
+      <div class="ml">Net Cash Flow</div>
+      <div class="mv" id="m-flow">₱0</div>
+      <div class="ms">Sales − Expenses</div>
+    </div>
+    <div class="m-card d">
+      <div class="ml">Remaining Profit</div>
+      <div class="mv" id="m-profit">₱0</div>
+      <div class="ms">Equals Net Cash Flow</div>
+    </div>
+    <div class="m-card e">
+      <div class="ml">Active Clients</div>
+      <div class="mv col-a" id="m-active">0</div>
+      <div class="ms">Unique clients (last 90 days)</div>
+    </div>
+    <div class="m-card f">
+      <div class="ml">Loyal / VIP %</div>
+      <div class="mv col-pk" id="m-loyal">0%</div>
+      <div class="ms">Loyal + VIP of all clients</div>
+    </div>
+    <div class="m-card g">
+      <div class="ml">Outstanding Supplier Debt</div>
+      <div class="mv col-o" id="m-sup-debt">₱0</div>
+      <div class="ms">Sum of all remaining balances</div>
+    </div>
+  </div>
+
+  <!-- Charts Row 1 -->
+  <div class="ch-row">
+    <div class="ch-card">
+      <div class="ch-title">Sales vs Expenses</div>
+      <div class="ch-sub">Monthly comparison</div>
+      <div class="ch-h"><canvas id="c-month"></canvas></div>
+    </div>
+    <div class="ch-card">
+      <div class="ch-title">Profit vs Expenses</div>
+      <div class="ch-sub">Income distribution</div>
+      <div class="ch-h"><canvas id="c-pie"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2: Top Clients -->
+  <div class="ch-card" style="margin-bottom:18px">
+    <div class="ch-title">Top 5 Clients by Total Spend</div>
+    <div class="ch-sub">Revenue contribution per client</div>
+    <div class="ch-h2"><canvas id="c-clients"></canvas></div>
+  </div>
+
+  <!-- Recent Transactions -->
+  <div class="sc">
+    <div class="sc-head"><h2>Recent Transactions</h2></div>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Client</th><th>ID</th><th>Loyalty</th><th>Project</th><th>Date</th><th style="text-align:right">Net Sales</th>
+          </tr>
+        </thead>
+        <tbody id="recent-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /dash -->
+
+<!-- ══════════════════════════════
+     CLIENT SALES
+══════════════════════════════ -->
+<div class="panel" id="panel-clients">
+  <div class="ph">
+    <div>
+      <h1>Client Sales Log</h1>
+      <p>Auto-generates Client ID &amp; Loyalty status • Net Sales = DP + Full Payment</p>
+    </div>
+    <div class="ph-acts">
+      <button class="btn btn-blue" id="btn-exp-clients">⬇ Export CSV</button>
+      <button class="btn btn-green" id="btn-add-client">＋ Add Row</button>
+    </div>
+  </div>
+
+  <!-- ── CLIENT ANALYTICS CHARTS ── -->
+  <div class="cl-analytics">
+    <!-- Sales Trend -->
+    <div class="ch-card">
+      <div class="ch-title">📈 Sales Trend</div>
+      <div class="ch-sub">Monthly net sales over time</div>
+      <div class="cl-an-h"><canvas id="cl-c-trend"></canvas></div>
+    </div>
+    <!-- Top Clients -->
+    <div class="ch-card">
+      <div class="ch-title">🏆 Top Clients</div>
+      <div class="ch-sub">Revenue per client (Top 6)</div>
+      <div class="cl-an-h"><canvas id="cl-c-top"></canvas></div>
+    </div>
+    <!-- Loyalty Mix -->
+    <div class="ch-card">
+      <div class="ch-title">💎 Loyalty Mix</div>
+      <div class="ch-sub">Client segment distribution</div>
+      <div class="cl-an-h"><canvas id="cl-c-loyalty"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sc">
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Client Name</th><th>Client ID</th><th>Loyalty</th>
+            <th>Project</th><th>DP (₱)</th><th>Full Pay (₱)</th><th>Net Sales (₱)</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="clients-body"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="7">Total Net Sales</td>
+            <td class="tf-val" id="clients-tot">₱0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div id="pg-cl"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     EXPENSES
+══════════════════════════════ -->
+<div class="panel" id="panel-expenses">
+  <div class="ph">
+    <div>
+      <h1>Expenses Log</h1>
+      <p>Track all supplier payments and operating costs</p>
+    </div>
+    <div class="ph-acts">
+      <button class="btn btn-blue" id="btn-exp-expenses">⬇ Export CSV</button>
+      <button class="btn btn-green" id="btn-add-exp">＋ Add Row</button>
+    </div>
+  </div>
+  <div class="sc">
+    <div class="tw">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Supplier / Category</th><th>Description</th><th>Amount Paid (₱)</th><th></th></tr>
+        </thead>
+        <tbody id="exp-body"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">Grand Total</td>
+            <td class="tf-val" id="exp-tot">₱0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div id="pg-ex"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     DEBTS
+══════════════════════════════ -->
+<div class="panel" id="panel-debts">
+  <div class="ph">
+    <div>
+      <h1>Debt Repayment</h1>
+      <p>Remaining Balance = Total Debt − Paid Amount (auto-calculated)</p>
+    </div>
+    <div class="ph-acts">
+      <button class="btn btn-blue" id="btn-exp-debts">⬇ Export CSV</button>
+      <button class="btn btn-green" id="btn-add-debt">＋ Add Row</button>
+    </div>
+  </div>
+  <div class="sc">
+    <div class="tw">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Creditor</th><th>Total Debt (₱)</th><th>Paid Amount (₱)</th><th>Remaining (₱)</th><th></th></tr>
+        </thead>
+        <tbody id="debts-body"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4">Total Remaining Debt</td>
+            <td class="tf-val" id="debts-tot">₱0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div id="pg-db"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SUPPLIER PAYMENTS
+══════════════════════════════ -->
+<div class="panel" id="panel-supplier">
+  <div class="ph">
+    <div>
+      <h1>Supplier Payments</h1>
+      <p>Track money you owe vs. money you've paid — linked automatically</p>
+    </div>
+    <div class="ph-acts">
+      <button class="btn btn-blue" id="btn-exp-supplier">⬇ Export All CSV</button>
+    </div>
+  </div>
+
+  <div class="sp-grid">
+    <!-- LEFT: Suppliers table -->
+    <div class="sc">
+      <div class="sc-head">
+        <div>
+          <h2>Suppliers (What I Owe)</h2>
+          <p>Each supplier appears once · Remaining = Total Debt − Paid</p>
+        </div>
+        <button class="btn btn-green" id="btn-add-sup">＋ Add Supplier</button>
+      </div>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr>
+              <th>Supplier Name</th>
+              <th>Total Debt (₱)</th>
+              <th>Paid So Far (₱)</th>
+              <th>Remaining (₱)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="sup-body"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3">Total Outstanding</td>
+              <td class="tf-val" id="sup-tot">₱0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="pg-sp"></div>
+    </div>
+
+    <!-- RIGHT: Payment History table -->
+    <div class="sc">
+      <div class="sc-head">
+        <div>
+          <h2>Payment History</h2>
+          <p>Each row = one payment · Auto-updates supplier balance</p>
+        </div>
+        <button class="btn btn-green" id="btn-add-pay">＋ Add Payment</button>
+      </div>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Supplier Name</th>
+              <th>Payment Amount (₱)</th>
+              <th>Reference / Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="pay-body"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2">Total Payments Made</td>
+              <td class="tf-val" id="pay-tot">₱0</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="pg-ph"></div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ══ PRINT VIEW ══ -->
+<div id="print-view"></div>
+
+<!-- ══ PROFILE DRAWER ══ -->
+<div class="overlay" id="prof-overlay"></div>
+<div class="drawer" id="prof-drawer">
+  <div class="dr-head">
+    <span>Client Profile</span>
+    <button class="dr-close" id="dr-close">✕</button>
+  </div>
+  <div class="dr-body">
+    <div class="dr-avatar" id="prof-av">?</div>
+    <div class="dr-name" id="prof-name">—</div>
+    <div class="dr-id" id="prof-id">—</div>
+    <div id="prof-badge"></div>
+    <div class="dr-stats">
+      <div class="dr-stat"><div class="dr-sl">Total Transactions</div><div class="dr-sv col-b" id="ps-count">0</div></div>
+      <div class="dr-stat"><div class="dr-sl">Total Spent</div><div class="dr-sv col-g" id="ps-total">₱0</div></div>
+      <div class="dr-stat"><div class="dr-sl">Avg Transaction</div><div class="dr-sv col-p" id="ps-avg">₱0</div></div>
+      <div class="dr-stat"><div class="dr-sl">Last Purchase</div><div class="dr-sv" id="ps-last" style="font-size:0.78rem">—</div></div>
+    </div>
+    <div class="dr-txns">
+      <h4>Recent Transactions</h4>
+      <div id="prof-txn-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast">✓ Saved</div>
+
+<script>
+/* ══════════════════════════════════════════
+   PERFORMANCE: DEBOUNCE + PAGINATION
+══════════════════════════════════════════ */
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);}}
+const PAGE_SIZE=100;
+const _pages={cl:0,ex:0,db:0,sp:0,ph:0};
+function paginateArr(arr,key){
+  const tot=arr.length,totPg=Math.max(1,Math.ceil(tot/PAGE_SIZE));
+  _pages[key]=Math.min(_pages[key],totPg-1);
+  return{slice:arr.slice(_pages[key]*PAGE_SIZE,(_pages[key]+1)*PAGE_SIZE),tot,totPg,pg:_pages[key]};
+}
+function pgHTML(key,tot,totPg,pg){
+  const el=document.getElementById('pg-'+key);
+  if(!el) return;
+  if(tot<=PAGE_SIZE){el.innerHTML='';return;}
+  const from=pg*PAGE_SIZE+1,to=Math.min((pg+1)*PAGE_SIZE,tot);
+  el.innerHTML=`<div class="pg-bar">
+    <span class="pg-info">Showing ${from}–${to} of <strong>${tot}</strong> records</span>
+    <div class="pg-btns">
+      <button class="btn btn-ol pg-btn" onclick="goPage('${key}',${pg-1})" ${pg===0?'disabled':''}>&#8249; Prev</button>
+      <span class="pg-num">Page ${pg+1} / ${totPg}</span>
+      <button class="btn btn-ol pg-btn" onclick="goPage('${key}',${pg+1})" ${pg>=totPg-1?'disabled':''}>Next &#8250;</button>
+    </div>
+  </div>`;
+}
+function goPage(key,p){
+  _pages[key]=p;
+  if(key==='cl') renderClients();
+  if(key==='ex') renderExpenses();
+  if(key==='db') renderDebts();
+  if(key==='sp') renderSuppliers();
+  if(key==='ph') renderPayments();
+}
+function resetPage(key){_pages[key]=0;}
+
+/* ══════════════════════════════════════════
+   DATA – defaults
+══════════════════════════════════════════ */
+function uid(){return Math.random().toString(36).slice(2,9)+Date.now().toString(36)}
+
+const DEF_CLIENTS=[
+  {id:uid(),date:'2026-04-01',name:'Client A',project:'Design',      dp:5000,full:5000},
+  {id:uid(),date:'2026-04-05',name:'Client B',project:'Development', dp:8000,full:0},
+  {id:uid(),date:'2026-04-10',name:'Client A',project:'Repair',      dp:2000,full:2000},
+];
+const DEF_EXPENSES=[
+  {id:uid(),date:'2026-04-02',supplier:'Supplier X',    desc:'Materials',amount:3000},
+  {id:uid(),date:'2026-04-06',supplier:'Daily Food',    desc:'Lunch',    amount:500},
+  {id:uid(),date:'2026-04-11',supplier:'Transportation',desc:'Fuel',     amount:1000},
+];
+const DEF_DEBTS=[
+  {id:uid(),date:'2026-04-01',creditor:'Supplier Y',totalDebt:5000,paid:1000},
+];
+const DEF_SUPPLIERS=[
+  {id:uid(),name:'Supplier X',totalDebt:15000},
+  {id:uid(),name:'Supplier Y',totalDebt:8000},
+  {id:uid(),name:'Supplier Z',totalDebt:5000},
+];
+const DEF_PAYMENTS=[
+  {id:uid(),date:'2026-04-01',supplier:'Supplier X',amount:3000,ref:'PO-001'},
+  {id:uid(),date:'2026-04-10',supplier:'Supplier X',amount:2000,ref:'PO-002'},
+  {id:uid(),date:'2026-04-05',supplier:'Supplier Y',amount:2000,ref:'PO-003'},
+  {id:uid(),date:'2026-04-12',supplier:'Supplier Z',amount:5000,ref:'PO-004'},
+];
+
+let clients   = dbLoad('emp_cl', DEF_CLIENTS);
+let expenses  = dbLoad('emp_ex', DEF_EXPENSES);
+let debts     = dbLoad('emp_db', DEF_DEBTS);
+let suppliers = dbLoad('emp_sp', DEF_SUPPLIERS);
+let payments  = dbLoad('emp_ph', DEF_PAYMENTS);
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function dbLoad(k,d){try{const s=localStorage.getItem(k);return s?JSON.parse(s):JSON.parse(JSON.stringify(d))}catch{return JSON.parse(JSON.stringify(d))}}
+function dbSave(){
+  localStorage.setItem('emp_cl',JSON.stringify(clients));
+  localStorage.setItem('emp_ex',JSON.stringify(expenses));
+  localStorage.setItem('emp_db',JSON.stringify(debts));
+  localStorage.setItem('emp_sp',JSON.stringify(suppliers));
+  localStorage.setItem('emp_ph',JSON.stringify(payments));
+  showToast('Auto-saved ✓');
+}
+function fmt(n){return '₱'+Number(n||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fmtShort(n){const v=Number(n||0);if(v>=1e6)return '₱'+(v/1e6).toFixed(1)+'M';if(v>=1e3)return '₱'+(v/1e3).toFixed(1)+'K';return '₱'+v.toLocaleString()}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function setText(id,val){const e=document.getElementById(id);if(e)e.textContent=val}
+function showToast(msg='Saved'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ══════════════════════════════════════════
+   CLIENT META (ID + Loyalty – derived)
+══════════════════════════════════════════ */
+/* Memoized — invalidated whenever clients array changes */
+let _metaCache=null,_metaDirty=true;
+function invalidateMeta(){_metaDirty=true;}
+function computeMeta(){
+  if(!_metaDirty&&_metaCache) return _metaCache;
+  const registry={},counts={};
+  let ctr=1;
+  const sorted=[...clients].filter(r=>r.name&&r.name.trim())
+    .sort((a,b)=>(a.date||'')<(b.date||'')?-1:(a.date||'')>(b.date||'')?1:0);
+  sorted.forEach(r=>{
+    const nm=r.name.trim();
+    if(!registry[nm]) registry[nm]='CLT-'+String(ctr++).padStart(3,'0');
+    counts[nm]=(counts[nm]||0)+1;
+  });
+  _metaCache={registry,counts};
+  _metaDirty=false;
+  return _metaCache;
+}
+
+function getLoyalty(count){
+  if(count>=10) return 'VIP';
+  if(count>=4)  return 'Loyal';
+  if(count>=2)  return 'Returning';
+  return 'New';
+}
+function loyaltyBadge(status){
+  const cls={New:'b-new',Returning:'b-ret',Loyal:'b-loy',VIP:'b-vip'}[status]||'b-new';
+  return `<span class="badge ${cls}">${status}</span>`;
+}
+
+/* ══════════════════════════════════════════
+   CALCS
+══════════════════════════════════════════ */
+function netSales(r){return(Number(r.dp)||0)+(Number(r.full)||0)}
+function remBal(r){return(Number(r.totalDebt)||0)-(Number(r.paid)||0)}
+function totalSales(){return clients.reduce((s,r)=>s+netSales(r),0)}
+
+/* Supplier helpers — payment map is cached and invalidated on mutation */
+let _payMap=null,_payDirty=true;
+function invalidatePayMap(){_payDirty=true;}
+function buildPayMap(){
+  _payMap={};
+  payments.forEach(p=>{
+    const n=p.supplier;
+    if(n) _payMap[n]=(_payMap[n]||0)+(Number(p.amount)||0);
+  });
+  _payDirty=false;
+}
+function paidForSupplier(name){
+  if(_payDirty) buildPayMap();
+  return _payMap[name]||0;
+}
+function supRemBal(sup){
+  return Math.max(0,(Number(sup.totalDebt)||0)-paidForSupplier(sup.name));
+}
+function totalSupDebt(){return suppliers.reduce((s,sup)=>s+supRemBal(sup),0);}
+function totalExp(){return expenses.reduce((s,r)=>s+(Number(r.amount)||0),0)}
+function totalRem(){return debts.reduce((s,r)=>s+remBal(r),0)}
+
+function activeClientCount(){
+  const now=new Date(), cut=new Date(now-90*864e5), seen=new Set();
+  clients.forEach(r=>{if(r.name&&r.name.trim()&&new Date(r.date)>=cut) seen.add(r.name.trim())});
+  return seen.size;
+}
+function loyalVipPct(meta){
+  const names=Object.keys(meta.counts);
+  if(!names.length) return 0;
+  const lv=names.filter(n=>meta.counts[n]>=4).length;
+  return Math.round(lv/names.length*100);
+}
+
+/* ══════════════════════════════════════════
+   METRICS
+══════════════════════════════════════════ */
+function refreshMetrics(){
+  const sales=totalSales(), exps=totalExp(), flow=sales-exps;
+  const meta=computeMeta();
+
+  setText('m-sales', fmt(sales));
+  setText('m-exp',   fmt(exps));
+  setText('m-active',activeClientCount());
+  setText('m-loyal', loyalVipPct(meta)+'%');
+  setText('m-sup-debt', fmt(totalSupDebt()));
+
+  const fe=document.getElementById('m-flow');
+  if(fe){fe.textContent=fmt(flow);fe.className='mv '+(flow>=0?'col-g':'col-r')}
+  const fp=document.getElementById('m-profit');
+  if(fp){fp.textContent=fmt(flow);fp.className='mv '+(flow>=0?'col-p':'col-r')}
+}
+
+/* ══════════════════════════════════════════
+   CHARTS
+══════════════════════════════════════════ */
+let cMonth, cPie, cClients;
+let clTrend, clTop, clLoyalty;
+
+const TT={
+  backgroundColor:'#1c2336',
+  borderColor:'#30363D',borderWidth:1,
+  titleColor:'#E6EDF3',bodyColor:'#8B949E',padding:10,
+  callbacks:{label:ctx=>' '+fmt(ctx.raw)}
+};
+const SX={grid:{color:'rgba(48,54,61,0.6)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>'₱'+Number(v).toLocaleString()}};
+const SY={grid:{color:'rgba(48,54,61,0.6)'},ticks:{color:'#8B949E',font:{size:10}}};
+
+function initCharts(){
+  Chart.defaults.color='#8B949E';
+  Chart.defaults.font.family='Inter';
+
+  cMonth=new Chart(document.getElementById('c-month').getContext('2d'),{
+    type:'bar',
+    data:{labels:[],datasets:[
+      {label:'Sales',data:[],backgroundColor:'rgba(56,139,253,0.7)',borderColor:'#388bfd',borderWidth:1.5,borderRadius:4},
+      {label:'Expenses',data:[],backgroundColor:'rgba(248,81,73,0.6)',borderColor:'#F85149',borderWidth:1.5,borderRadius:4},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{labels:{color:'#8B949E',font:{size:11}}},tooltip:TT},
+      scales:{x:SY,y:{...SX}}
+    }
+  });
+
+  cPie=new Chart(document.getElementById('c-pie').getContext('2d'),{
+    type:'doughnut',
+    data:{
+      labels:['Profit','Expenses'],
+      datasets:[{data:[0,0],
+        backgroundColor:['rgba(35,134,54,0.75)','rgba(248,81,73,0.7)'],
+        borderColor:['#238636','#F85149'],
+        borderWidth:1.5,hoverOffset:5
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'60%',
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#8B949E',padding:14,boxWidth:12,font:{size:11}}},
+        tooltip:{...TT,callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.raw)}`}}
+      }
+    }
+  });
+
+  cClients=new Chart(document.getElementById('c-clients').getContext('2d'),{
+    type:'bar',
+    data:{labels:[],datasets:[{
+      label:'Total Sales',data:[],
+      backgroundColor:'rgba(35,134,54,0.7)',borderColor:'#238636',
+      borderWidth:1.5,borderRadius:4,barThickness:18,
+    }]},
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:TT},
+      scales:{
+        x:{...SX},
+        y:{grid:{display:false},ticks:{color:'#9ca3af',font:{size:11,weight:'500'}}}
+      }
+    }
+  });
+}
+
+/* ── CLIENT PANEL CHARTS ── */
+function initClientCharts(){
+  const baseTooltip={
+    backgroundColor:'#1c2336',borderColor:'#30363D',borderWidth:1,
+    titleColor:'#E6EDF3',bodyColor:'#8B949E',padding:10,
+    callbacks:{label:ctx=>' '+fmt(ctx.raw)}
+  };
+
+  // 1. Sales Trend – Line
+  clTrend=new Chart(document.getElementById('cl-c-trend').getContext('2d'),{
+    type:'line',
+    data:{labels:[],datasets:[{
+      label:'Net Sales',data:[],
+      borderColor:'#388bfd',
+      backgroundColor:'rgba(56,139,253,0.08)',
+      borderWidth:2,pointRadius:4,pointHoverRadius:6,
+      pointBackgroundColor:'#388bfd',fill:true,tension:0.35,
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:baseTooltip},
+      scales:{
+        x:{grid:{color:'rgba(48,54,61,0.5)'},ticks:{color:'#8B949E',font:{size:10}}},
+        y:{grid:{color:'rgba(48,54,61,0.5)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>'₱'+Number(v).toLocaleString()}}
+      }
+    }
+  });
+
+  // 2. Top Clients – Horizontal Bar
+  clTop=new Chart(document.getElementById('cl-c-top').getContext('2d'),{
+    type:'bar',
+    data:{labels:[],datasets:[{
+      label:'Total Sales',data:[],
+      backgroundColor:[
+        'rgba(56,139,253,0.75)','rgba(63,185,80,0.75)',
+        'rgba(167,139,250,0.75)','rgba(251,191,36,0.75)',
+        'rgba(248,81,73,0.72)','rgba(236,72,153,0.72)',
+      ],
+      borderColor:[
+        '#388bfd','#3fb950','#a78bfa','#fbbf24','#F85149','#ec4899',
+      ],
+      borderWidth:1.5,borderRadius:4,barThickness:13,
+    }]},
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:baseTooltip},
+      scales:{
+        x:{grid:{color:'rgba(48,54,61,0.5)'},ticks:{color:'#8B949E',font:{size:9},callback:v=>'₱'+Number(v).toLocaleString()}},
+        y:{grid:{display:false},ticks:{color:'#9ca3af',font:{size:10,weight:'500'}}}
+      }
+    }
+  });
+
+  // 3. Loyalty Mix – Doughnut
+  clLoyalty=new Chart(document.getElementById('cl-c-loyalty').getContext('2d'),{
+    type:'doughnut',
+    data:{
+      labels:['New','Returning','Loyal','VIP'],
+      datasets:[{
+        data:[0,0,0,0],
+        backgroundColor:[
+          'rgba(139,148,158,0.75)',
+          'rgba(56,139,253,0.75)',
+          'rgba(245,158,11,0.78)',
+          'rgba(139,92,246,0.78)',
+        ],
+        borderColor:['#8b949e','#388bfd','#f59e0b','#8b5cf6'],
+        borderWidth:1.5,hoverOffset:6
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'58%',
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#8B949E',padding:10,boxWidth:10,font:{size:10}}},
+        tooltip:{...baseTooltip,callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}`}}
+      }
+    }
+  });
+}
+
+function updateClientCharts(){
+  if(!clTrend||!clTop||!clLoyalty) return;
+  const meta=computeMeta();
+
+  // --- Trend: monthly net sales ---
+  const mmap={};
+  clients.forEach(r=>{
+    const mo=(r.date||'').slice(0,7); if(!mo) return;
+    mmap[mo]=(mmap[mo]||0)+netSales(r);
+  });
+  const mos=Object.keys(mmap).sort();
+  clTrend.data.labels=mos.map(m=>{
+    const [y,mn]=m.split('-');
+    return new Date(+y,+mn-1).toLocaleString('en-US',{month:'short',year:'2-digit'});
+  });
+  clTrend.data.datasets[0].data=mos.map(m=>mmap[m]);
+  clTrend.update();
+
+  // --- Top 6 clients ---
+  const ct={};
+  clients.forEach(r=>{const n=r.name&&r.name.trim();if(!n)return;ct[n]=(ct[n]||0)+netSales(r)});
+  const top=Object.entries(ct).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  clTop.data.labels=top.map(([n])=>n);
+  clTop.data.datasets[0].data=top.map(([,v])=>v);
+  clTop.update();
+
+  // --- Loyalty distribution (unique client names) ---
+  const names=Object.keys(meta.counts);
+  const dist={New:0,Returning:0,Loyal:0,VIP:0};
+  names.forEach(n=>{
+    const lv=getLoyalty(meta.counts[n]);
+    dist[lv]=(dist[lv]||0)+1;
+  });
+  clLoyalty.data.datasets[0].data=[dist.New,dist.Returning,dist.Loyal,dist.VIP];
+  clLoyalty.update();
+}
+
+function updateCharts(){
+  // 1. Month bar
+  const mmap={};
+  clients.forEach(r=>{
+    const mo=(r.date||'').slice(0,7); if(!mo) return;
+    mmap[mo]=mmap[mo]||{s:0,e:0}; mmap[mo].s+=netSales(r);
+  });
+  expenses.forEach(r=>{
+    const mo=(r.date||'').slice(0,7); if(!mo) return;
+    mmap[mo]=mmap[mo]||{s:0,e:0}; mmap[mo].e+=Number(r.amount)||0;
+  });
+  const mos=Object.keys(mmap).sort();
+  cMonth.data.labels=mos;
+  cMonth.data.datasets[0].data=mos.map(m=>mmap[m].s);
+  cMonth.data.datasets[1].data=mos.map(m=>mmap[m].e);
+  cMonth.update();
+
+  // 2. Pie
+  const sales=totalSales(), exps=totalExp(), profit=Math.max(0,sales-exps);
+  cPie.data.datasets[0].data=[profit,exps];
+  cPie.data.labels=[`Profit (${fmt(profit)})`,`Expenses (${fmt(exps)})`];
+  cPie.update();
+
+  // 3. Top 5 clients
+  const ct={};
+  clients.forEach(r=>{const n=r.name&&r.name.trim();if(!n)return;ct[n]=(ct[n]||0)+netSales(r)});
+  const top=Object.entries(ct).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  cClients.data.labels=top.map(([n])=>n);
+  cClients.data.datasets[0].data=top.map(([,v])=>v);
+  cClients.update();
+
+  // Also keep client-panel charts in sync
+  updateClientCharts();
+}
+
+function refreshDashboard(){
+  refreshMetrics();
+  updateCharts();
+  renderRecent();
+}
+
+/* ══════════════════════════════════════════
+   RECENT TABLE (dashboard)
+══════════════════════════════════════════ */
+function renderRecent(){
+  const meta=computeMeta();
+  const tbody=document.getElementById('recent-body');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  const sorted=[...clients].sort((a,b)=>b.date<a.date?-1:b.date>a.date?1:0).slice(0,6);
+  if(!sorted.length){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:18px">No transactions yet</td></tr>';
+    return;
+  }
+  sorted.forEach(r=>{
+    const nm=r.name&&r.name.trim()||'—';
+    const cid=meta.registry[nm]||'—';
+    const cnt=meta.counts[nm]||1;
+    const ns=netSales(r);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:600">${esc(nm)}</td>
+      <td class="ro">${esc(cid)}</td>
+      <td>${loyaltyBadge(getLoyalty(cnt))}</td>
+      <td style="color:var(--muted2)">${esc(r.project||'—')}</td>
+      <td class="ro">${esc(r.date||'—')}</td>
+      <td style="text-align:right" class="${ns<0?'td-neg':'td-net'}">${fmt(ns)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ══════════════════════════════════════════
+   RENDER: CLIENT SALES TABLE
+══════════════════════════════════════════ */
+function renderClients(){
+  const meta=computeMeta();
+  const tbody=document.getElementById('clients-body');
+  tbody.innerHTML='';
+  const {slice,tot,totPg,pg}=paginateArr(clients,'cl');
+  const frag=document.createDocumentFragment();
+  slice.forEach(r=>{
+    const nm=r.name&&r.name.trim()||'';
+    const cid=nm?meta.registry[nm]||'':'—';
+    const cnt=nm?meta.counts[nm]||1:1;
+    const loyalty=nm?getLoyalty(cnt):'New';
+    const ns=netSales(r);
+    const tr=document.createElement('tr');
+    tr.dataset.rid=r.id;
+    tr.innerHTML=`
+      <td><input type="date" value="${esc(r.date)}" data-f="date" data-t="cl" data-id="${r.id}"/></td>
+      <td><input type="text" value="${esc(r.name)}" placeholder="Client Name" data-f="name" data-t="cl" data-id="${r.id}" style="min-width:100px"/></td>
+      <td class="ro td-cid">${esc(cid)}</td>
+      <td class="td-loy">${loyaltyBadge(loyalty)}</td>
+      <td><input type="text" value="${esc(r.project)}" placeholder="Project" data-f="project" data-t="cl" data-id="${r.id}" style="min-width:90px"/></td>
+      <td><input type="number" value="${Number(r.dp)||0}" min="0" data-f="dp" data-t="cl" data-id="${r.id}"/></td>
+      <td><input type="number" value="${Number(r.full)||0}" min="0" data-f="full" data-t="cl" data-id="${r.id}"/></td>
+      <td class="${ns<0?'td-neg':'td-net'} td-ns">${fmt(ns)}</td>
+      <td><div class="act-c">
+        <button class="btn-prof" data-action="profile" data-name="${esc(nm)}">👤 Profile</button>
+        <button class="btn-del" data-action="del" data-t="cl" data-id="${r.id}" title="Delete row">🗑</button>
+      </div></td>`;
+    frag.appendChild(tr);
+  });
+  tbody.appendChild(frag);
+  if(!tot) tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:22px">No client records yet — click ＋ Add Row</td></tr>';
+  document.getElementById('clients-tot').textContent=fmt(totalSales());
+  pgHTML('cl',tot,totPg,pg);
+  refreshMetrics();
+}
+
+/* Only update computed cells, no re-render (preserves input focus) */
+function refreshClientCells(){
+  const meta=computeMeta();
+  document.querySelectorAll('#clients-body tr[data-rid]').forEach(tr=>{
+    const rid=tr.dataset.rid;
+    const r=clients.find(c=>c.id===rid); if(!r) return;
+    const nm=r.name&&r.name.trim()||'';
+    const cid=nm?meta.registry[nm]||'':'—';
+    const cnt=nm?meta.counts[nm]||1:1;
+    const ns=netSales(r);
+    const cidEl=tr.querySelector('.td-cid');
+    const loyEl=tr.querySelector('.td-loy');
+    const nsEl=tr.querySelector('.td-ns');
+    const profBtn=tr.querySelector('.btn-prof');
+    if(cidEl) cidEl.textContent=cid;
+    if(loyEl) loyEl.innerHTML=loyaltyBadge(nm?getLoyalty(cnt):'New');
+    if(nsEl){nsEl.textContent=fmt(ns);nsEl.className=(ns<0?'td-neg':'td-net')+' td-ns';}
+    if(profBtn) profBtn.dataset.name=nm;
+  });
+  document.getElementById('clients-tot').textContent=fmt(totalSales());
+  refreshMetrics();
+}
+
+/* ══════════════════════════════════════════
+   RENDER: EXPENSES TABLE
+══════════════════════════════════════════ */
+function renderExpenses(){
+  const tbody=document.getElementById('exp-body');
+  tbody.innerHTML='';
+  const {slice,tot,totPg,pg}=paginateArr(expenses,'ex');
+  const frag=document.createDocumentFragment();
+  slice.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><input type="date" value="${esc(r.date)}" data-f="date" data-t="ex" data-id="${r.id}"/></td>
+      <td><input type="text" value="${esc(r.supplier)}" placeholder="Supplier" data-f="supplier" data-t="ex" data-id="${r.id}" style="min-width:120px"/></td>
+      <td><input type="text" value="${esc(r.desc)}" placeholder="Description" data-f="desc" data-t="ex" data-id="${r.id}" style="min-width:120px"/></td>
+      <td><input type="number" value="${Number(r.amount)||0}" min="0" data-f="amount" data-t="ex" data-id="${r.id}"/></td>
+      <td><button class="btn-del" data-action="del" data-t="ex" data-id="${r.id}" title="Delete">🗑</button></td>`;
+    frag.appendChild(tr);
+  });
+  tbody.appendChild(frag);
+  if(!tot) tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:22px">No expenses yet — click ＋ Add Row</td></tr>';
+  document.getElementById('exp-tot').textContent=fmt(totalExp());
+  pgHTML('ex',tot,totPg,pg);
+  refreshMetrics();
+}
+
+/* ══════════════════════════════════════════
+   RENDER: DEBTS TABLE
+══════════════════════════════════════════ */
+function renderDebts(){
+  const tbody=document.getElementById('debts-body');
+  tbody.innerHTML='';
+  const {slice,tot,totPg,pg}=paginateArr(debts,'db');
+  const frag=document.createDocumentFragment();
+  slice.forEach(r=>{
+    const rb=remBal(r);
+    const tr=document.createElement('tr');
+    tr.dataset.rid=r.id;
+    tr.innerHTML=`
+      <td><input type="date" value="${esc(r.date)}" data-f="date" data-t="db" data-id="${r.id}"/></td>
+      <td><input type="text" value="${esc(r.creditor)}" placeholder="Creditor" data-f="creditor" data-t="db" data-id="${r.id}" style="min-width:120px"/></td>
+      <td><input type="number" value="${Number(r.totalDebt)||0}" min="0" data-f="totalDebt" data-t="db" data-id="${r.id}"/></td>
+      <td><input type="number" value="${Number(r.paid)||0}" min="0" data-f="paid" data-t="db" data-id="${r.id}"/></td>
+      <td class="td-rem td-rb-${r.id} ${rb<=0?'col-g':'col-r'}">${fmt(rb)}</td>
+      <td><button class="btn-del" data-action="del" data-t="db" data-id="${r.id}" title="Delete">🗑</button></td>`;
+    frag.appendChild(tr);
+  });
+  tbody.appendChild(frag);
+  if(!tot) tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:22px">No debts yet — click ＋ Add Row</td></tr>';
+  document.getElementById('debts-tot').textContent=fmt(totalRem());
+  pgHTML('db',tot,totPg,pg);
+}
+
+/* ══════════════════════════════════════════
+   RENDER: SUPPLIERS TABLE
+══════════════════════════════════════════ */
+function renderSuppliers(){
+  const tbody=document.getElementById('sup-body');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  const {slice:supSlice,tot:supTot,totPg:supTotPg,pg:supPg}=paginateArr(suppliers,'sp');
+  const frag=document.createDocumentFragment();
+  supSlice.forEach(sup=>{
+    const paid=paidForSupplier(sup.name);
+    const rem=supRemBal(sup);
+    const debt=Number(sup.totalDebt)||0;
+    const pct=debt>0?Math.min(100,Math.round(paid/debt*100)):0;
+    const isSettled=rem===0;
+    const tr=document.createElement('tr');
+    tr.dataset.rid=sup.id;
+    tr.innerHTML=`
+      <td><input type="text" value="${esc(sup.name)}" placeholder="Supplier Name" data-f="name" data-t="sp" data-id="${sup.id}" style="min-width:110px"/></td>
+      <td><input type="number" value="${Number(sup.totalDebt)||0}" min="0" data-f="totalDebt" data-t="sp" data-id="${sup.id}"/></td>
+      <td>
+        <span data-role="sup-paid-${sup.id}" style="font-size:0.8rem;font-weight:600;color:var(--pos-lt)">${fmt(paid)}</span>
+        <div class="sp-progress-wrap"><div class="sp-progress-bar sp-bar-${sup.id}" style="width:${pct}%;background:${isSettled?'linear-gradient(90deg,#238636,#3fb950)':pct>75?'linear-gradient(90deg,#388bfd,#58a6ff)':'linear-gradient(90deg,#F85149,#ffa07a)'}"></div></div>
+        <span data-role="sup-pct-${sup.id}" style="font-size:0.62rem;color:var(--muted)">${pct}% paid</span>
+      </td>
+      <td class="td-sup-rem sp-rem-${sup.id} ${isSettled?'col-g':'col-r'}">${fmt(rem)}</td>
+      <td><button class="btn-del" data-action="del" data-t="sp" data-id="${sup.id}" title="Delete">🗑</button></td>`;
+    frag.appendChild(tr);
+  });
+  tbody.appendChild(frag);
+  if(!supTot) tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:22px">No suppliers yet — click ＋ Add Supplier</td></tr>';
+  const totEl=document.getElementById('sup-tot');
+  if(totEl) totEl.textContent=fmt(totalSupDebt());
+  pgHTML('sp',supTot,supTotPg,supPg);
+  refreshMetrics();
+}
+
+/* ══════════════════════════════════════════
+   RENDER: PAYMENT HISTORY TABLE
+══════════════════════════════════════════ */
+function renderPayments(){
+  const tbody=document.getElementById('pay-body');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  const {slice,tot,totPg,pg}=paginateArr(payments,'ph');
+  const frag=document.createDocumentFragment();
+  slice.forEach(p=>{
+    const tr=document.createElement('tr');
+    tr.dataset.rid=p.id;
+    tr.innerHTML=`
+      <td><input type="date" value="${esc(p.date)}" data-f="date" data-t="ph" data-id="${p.id}"/></td>
+      <td><input type="text" value="${esc(p.supplier)}" placeholder="Supplier Name" data-f="supplier" data-t="ph" data-id="${p.id}" style="min-width:110px"/></td>
+      <td><input type="number" value="${Number(p.amount)||0}" min="0" data-f="amount" data-t="ph" data-id="${p.id}"/></td>
+      <td><input type="text" value="${esc(p.ref)}" placeholder="Reference / Notes" data-f="ref" data-t="ph" data-id="${p.id}" style="min-width:110px"/></td>
+      <td><button class="btn-del" data-action="del" data-t="ph" data-id="${p.id}" title="Delete">🗑</button></td>`;
+    frag.appendChild(tr);
+  });
+  tbody.appendChild(frag);
+  if(!tot) tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:22px">No payments yet — click ＋ Add Payment</td></tr>';
+  const totEl=document.getElementById('pay-tot');
+  if(totEl) totEl.textContent=fmt(payments.reduce((s,p)=>s+(Number(p.amount)||0),0));
+  pgHTML('ph',tot,totPg,pg);
+  refreshSupplierCells();
+}
+
+/* Refresh only computed cells in suppliers table (no full re-render) */
+function refreshSupplierCells(){
+  suppliers.forEach(sup=>{
+    const paid=paidForSupplier(sup.name);
+    const rem=supRemBal(sup);
+    const debt=Number(sup.totalDebt)||0;
+    const pct=debt>0?Math.min(100,Math.round(paid/debt*100)):0;
+    const isSettled=rem===0;
+    const remEl=document.querySelector(`.sp-rem-${sup.id}`);
+    const barEl=document.querySelector(`.sp-bar-${sup.id}`);
+    const paidEl=document.querySelector(`[data-role="sup-paid-${sup.id}"]`);
+    const pctEl=document.querySelector(`[data-role="sup-pct-${sup.id}"]`);
+    if(remEl){remEl.textContent=fmt(rem);remEl.className=`td-sup-rem sp-rem-${sup.id} ${isSettled?'col-g':'col-r'}`;}
+    if(barEl){
+      barEl.style.width=pct+'%';
+      const barColor=isSettled?'linear-gradient(90deg,#238636,#3fb950)':pct>75?'linear-gradient(90deg,#388bfd,#58a6ff)':'linear-gradient(90deg,#F85149,#ffa07a)';
+      barEl.style.background=barColor;
+    }
+    if(paidEl) paidEl.textContent=fmt(paid);
+    if(pctEl) pctEl.textContent=`${pct}% paid`;
+  });
+  const tot=document.getElementById('sup-tot');
+  if(tot) tot.textContent=fmt(totalSupDebt());
+  refreshMetrics();
+}
+
+/* ══════════════════════════════════════════
+   EVENT DELEGATION
+══════════════════════════════════════════ */
+/* NUM_F list – used for inline input parsing */
+
+/* Debounced save — writes to localStorage 900ms after the last keystroke */
+const dbSaveLazy=debounce(dbSave,900);
+
+document.addEventListener('input',e=>{
+  const el=e.target;
+  const {f,t,id}=el.dataset;
+  if(!f||!t||!id) return;
+  const numFields=['dp','full','amount','totalDebt','paid'];
+  const rec=getArr(t).find(r=>r.id===id);
+  if(!rec) return;
+  rec[f]=numFields.includes(f)?(parseFloat(el.value)||0):el.value;
+  /* Invalidate caches when underlying data changes */
+  if(t==='cl'){invalidateMeta();refreshClientCells();}
+  if(t==='ex'){
+    const el2=document.getElementById('exp-tot');
+    if(el2) el2.textContent=fmt(totalExp());
+    refreshMetrics();
+  }
+  if(t==='db'){
+    const rb=remBal(rec);
+    const cell=document.querySelector(`.td-rb-${id}`);
+    if(cell){cell.textContent=fmt(rb);cell.className=`td-rem td-rb-${id} ${rb<=0?'col-g':'col-r'}`;}
+    document.getElementById('debts-tot').textContent=fmt(totalRem());
+    refreshMetrics();
+  }
+  if(t==='sp'){refreshSupplierCells();}
+  if(t==='ph'){
+    invalidatePayMap();
+    const payTot=document.getElementById('pay-tot');
+    if(payTot) payTot.textContent=fmt(payments.reduce((s,p)=>s+(Number(p.amount)||0),0));
+    refreshSupplierCells();
+  }
+  dbSaveLazy();
+});
+
+document.addEventListener('change',e=>{
+  const el=e.target;
+  const {f,t,id}=el.dataset;
+  if(!f||!t||!id) return;
+  const numFields=['dp','full','amount','totalDebt','paid'];
+  const rec=getArr(t).find(r=>r.id===id);
+  if(!rec) return;
+  rec[f]=numFields.includes(f)?(parseFloat(el.value)||0):el.value;
+  if(t==='cl'){invalidateMeta();refreshClientCells();updateCharts();}
+  if(t==='ex'){renderExpenses();updateCharts();}
+  if(t==='db'){renderDebts();refreshMetrics();}
+  if(t==='sp'){refreshSupplierCells();}
+  if(t==='ph'){invalidatePayMap();renderPayments();}
+  dbSave();
+});
+
+document.addEventListener('click',e=>{
+  // Delete row
+  const delBtn=e.target.closest('[data-action="del"]');
+  if(delBtn){
+    const {t,id}=delBtn.dataset;
+    if(!confirm('Delete this row?')) return;
+    if(t==='cl'){clients=clients.filter(r=>r.id!==id);invalidateMeta();resetPage('cl');renderClients();updateCharts();}
+    if(t==='ex'){expenses=expenses.filter(r=>r.id!==id);resetPage('ex');renderExpenses();updateCharts();}
+    if(t==='db'){debts=debts.filter(r=>r.id!==id);resetPage('db');renderDebts();}
+    if(t==='sp'){suppliers=suppliers.filter(r=>r.id!==id);resetPage('sp');renderSuppliers();}
+    if(t==='ph'){payments=payments.filter(r=>r.id!==id);invalidatePayMap();resetPage('ph');renderPayments();}
+    dbSave(); return;
+  }
+  // Profile
+  const profBtn=e.target.closest('[data-action="profile"]');
+  if(profBtn){openProfile(profBtn.dataset.name); return;}
+});
+
+function getArr(t){
+  if(t==='cl')return clients;
+  if(t==='ex')return expenses;
+  if(t==='db')return debts;
+  if(t==='sp')return suppliers;
+  if(t==='ph')return payments;
+  return[];
+}
+
+/* ══════════════════════════════════════════
+   ADD ROWS
+══════════════════════════════════════════ */
+function focusLast(bodyId,sel){
+  const b=document.getElementById(bodyId);
+  const inp=b&&b.querySelector('tr:last-child '+sel);
+  if(inp){setTimeout(()=>{inp.scrollIntoView({block:'nearest'});inp.focus();inp.select()},50);}
+}
+
+document.getElementById('btn-add-client').addEventListener('click',()=>{
+  const today=new Date().toISOString().slice(0,10);
+  clients.push({id:uid(),date:today,name:'',project:'',dp:0,full:0});
+  invalidateMeta();
+  /* Jump to last page so new row is visible */
+  _pages.cl=Math.floor(clients.length/PAGE_SIZE);
+  renderClients(); dbSave(); focusLast('clients-body','input[data-f="name"]');
+});
+document.getElementById('btn-add-exp').addEventListener('click',()=>{
+  const today=new Date().toISOString().slice(0,10);
+  expenses.push({id:uid(),date:today,supplier:'',desc:'',amount:0});
+  _pages.ex=Math.floor(expenses.length/PAGE_SIZE);
+  renderExpenses(); dbSave(); focusLast('exp-body','input[data-f="supplier"]');
+});
+document.getElementById('btn-add-debt').addEventListener('click',()=>{
+  const today=new Date().toISOString().slice(0,10);
+  debts.push({id:uid(),date:today,creditor:'',totalDebt:0,paid:0});
+  _pages.db=Math.floor(debts.length/PAGE_SIZE);
+  renderDebts(); dbSave(); focusLast('debts-body','input[data-f="creditor"]');
+});
+document.getElementById('btn-add-sup').addEventListener('click',()=>{
+  suppliers.push({id:uid(),name:'',totalDebt:0});
+  _pages.sp=Math.floor(suppliers.length/PAGE_SIZE);
+  renderSuppliers(); dbSave(); focusLast('sup-body','input[data-f="name"]');
+});
+document.getElementById('btn-add-pay').addEventListener('click',()=>{
+  const today=new Date().toISOString().slice(0,10);
+  payments.push({id:uid(),date:today,supplier:'',amount:0,ref:''});
+  invalidatePayMap();
+  _pages.ph=Math.floor(payments.length/PAGE_SIZE);
+  renderPayments(); dbSave(); focusLast('pay-body','input[data-f="supplier"]');
+});
+
+/* ══════════════════════════════════════════
+   PROFILE DRAWER
+══════════════════════════════════════════ */
+function openProfile(name){
+  const nm=(name||'').trim(); if(!nm) return;
+  const meta=computeMeta();
+  const rows=clients.filter(r=>(r.name||'').trim()===nm);
+  const count=rows.length;
+  const totalSpent=rows.reduce((s,r)=>s+netSales(r),0);
+  const avg=count?totalSpent/count:0;
+  const lastDate=rows.reduce((d,r)=>r.date>d?r.date:d,'');
+  const cid=meta.registry[nm]||'—';
+  const loyalty=count?getLoyalty(count):'New';
+
+  document.getElementById('prof-av').textContent=nm.charAt(0).toUpperCase();
+  document.getElementById('prof-name').textContent=nm;
+  document.getElementById('prof-id').textContent=cid;
+  document.getElementById('prof-badge').innerHTML=loyaltyBadge(loyalty);
+  setText('ps-count',count);
+  setText('ps-total',fmt(totalSpent));
+  setText('ps-avg',fmt(avg));
+  setText('ps-last',lastDate||'—');
+
+  const list=document.getElementById('prof-txn-list');
+  list.innerHTML='';
+  const recent=[...rows].sort((a,b)=>b.date<a.date?-1:b.date>a.date?1:0).slice(0,5);
+  if(!recent.length){list.innerHTML='<p style="color:var(--muted);font-size:0.72rem">No transactions</p>';return;}
+  recent.forEach(r=>{
+    const ns=netSales(r);
+    list.innerHTML+=`<div class="dr-txn">
+      <div class="dr-tl">
+        <div>${esc(r.project||'—')}</div>
+        <div class="dr-td">${esc(r.date||'—')}</div>
+      </div>
+      <div class="dr-ta">${fmt(ns)}</div>
+    </div>`;
+  });
+
+  document.getElementById('prof-overlay').classList.add('open');
+  document.getElementById('prof-drawer').classList.add('open');
+}
+
+function closeProfile(){
+  document.getElementById('prof-overlay').classList.remove('open');
+  document.getElementById('prof-drawer').classList.remove('open');
+}
+document.getElementById('dr-close').addEventListener('click',closeProfile);
+document.getElementById('prof-overlay').addEventListener('click',closeProfile);
+
+/* ══════════════════════════════════════════
+   TABS
+══════════════════════════════════════════ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='dash') refreshDashboard();
+  });
+});
+
+/* ══════════════════════════════════════════
+   EXPORT CSV
+══════════════════════════════════════════ */
+function dlCSV(txt,name){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv;charset=utf-8;'}));
+  a.download=name; a.click(); URL.revokeObjectURL(a.href);
+  showToast('CSV Exported ✓');
+}
+function row(...vals){return vals.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')+'\r\n'}
+
+document.getElementById('btn-exp-clients').addEventListener('click',()=>{
+  const meta=computeMeta();
+  let c='Date,Client Name,Client ID,Loyalty Status,Project,DP,Full Payment,Net Sales\r\n';
+  clients.forEach(r=>{
+    const nm=(r.name||'').trim();
+    const cid=nm?meta.registry[nm]||'':'';
+    const cnt=nm?meta.counts[nm]||1:1;
+    c+=row(r.date,nm,cid,getLoyalty(cnt),r.project,r.dp,r.full,netSales(r));
+  });
+  c+=row('','','','','','','TOTAL SALES',totalSales());
+  dlCSV(c,'client-sales.csv');
+});
+document.getElementById('btn-exp-expenses').addEventListener('click',()=>{
+  let c='Date,Supplier,Description,Amount Paid\r\n';
+  expenses.forEach(r=>c+=row(r.date,r.supplier,r.desc,r.amount));
+  c+=row('','','GRAND TOTAL',totalExp());
+  dlCSV(c,'expenses.csv');
+});
+document.getElementById('btn-exp-debts').addEventListener('click',()=>{
+  let c='Date,Creditor,Total Debt,Paid Amount,Remaining Balance\r\n';
+  debts.forEach(r=>c+=row(r.date,r.creditor,r.totalDebt,r.paid,remBal(r)));
+  c+=row('','','','TOTAL REMAINING',totalRem());
+  dlCSV(c,'debts.csv');
+});
+document.getElementById('btn-exp-supplier').addEventListener('click',()=>{
+  const meta=computeMeta();
+  /* Sheet 1: Suppliers */
+  let c='=== SUPPLIERS (WHAT I OWE) ===\r\n';
+  c+='Supplier Name,Total Debt,Amount Paid So Far,Remaining Balance\r\n';
+  suppliers.forEach(sup=>{
+    const paid=paidForSupplier(sup.name);
+    c+=row(sup.name,sup.totalDebt,paid,supRemBal(sup));
+  });
+  c+=row('','','TOTAL OUTSTANDING',totalSupDebt());
+  c+='\r\n=== PAYMENT HISTORY ===\r\n';
+  c+='Date,Supplier Name,Payment Amount,Reference/Notes\r\n';
+  payments.forEach(p=>c+=row(p.date,p.supplier,p.amount,p.ref));
+  c+=row('','TOTAL PAYMENTS',payments.reduce((s,p)=>s+(Number(p.amount)||0),0),'');
+  /* Append client/expenses/debts sheets */
+  c+='\r\n=== CLIENT SALES ===\r\n';
+  c+='Date,Client Name,Client ID,Loyalty,Project,DP,Full Pay,Net Sales\r\n';
+  const cmeta=computeMeta();
+  clients.forEach(r=>{
+    const nm=(r.name||'').trim();
+    c+=row(r.date,nm,cmeta.registry[nm]||'',getLoyalty(cmeta.counts[nm]||1),r.project,r.dp,r.full,netSales(r));
+  });
+  c+='\r\n=== EXPENSES ===\r\n';
+  c+='Date,Supplier/Category,Description,Amount\r\n';
+  expenses.forEach(r=>c+=row(r.date,r.supplier,r.desc,r.amount));
+  c+='\r\n=== DEBTS ===\r\n';
+  c+='Date,Creditor,Total Debt,Paid,Remaining\r\n';
+  debts.forEach(r=>c+=row(r.date,r.creditor,r.totalDebt,r.paid,remBal(r)));
+  dlCSV(c,'ellazo-full-export.csv');
+});
+
+/* ══════════════════════════════════════════
+   HEADER DATE
+══════════════════════════════════════════ */
+document.getElementById('hdr-date').textContent=
+  new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+/* ══════════════════════════════════════════
+   PRINT / RESET
+══════════════════════════════════════════ */
+/* ══════════════════════════════════════════
+   BUILD PRINT VIEW
+══════════════════════════════════════════ */
+function buildPrintView(){
+  const meta = computeMeta();
+  const now  = new Date();
+  const mo   = now.toLocaleString('en-US',{month:'long'});
+  const yr   = now.getFullYear();
+
+  /* ── helpers ── */
+  const pbadge = s=>{
+    const cls={New:'badge-new',Returning:'badge-ret',Loyal:'badge-loy',VIP:'badge-vip'}[s]||'badge-new';
+    return `<span class="${cls}">${s}</span>`;
+  };
+
+  /* ── Client Sales rows ── */
+  let clientRows='';
+  clients.forEach(r=>{
+    const nm=(r.name||'').trim();
+    const cid=nm?meta.registry[nm]||'—':'—';
+    const cnt=nm?meta.counts[nm]||1:1;
+    const ns=netSales(r);
+    clientRows+=`<tr>
+      <td>${esc(r.date||'—')}</td>
+      <td style="font-weight:600">${esc(nm||'—')}</td>
+      <td>${esc(cid)}</td>
+      <td>${pbadge(getLoyalty(cnt))}</td>
+      <td>${esc(r.project||'—')}</td>
+      <td class="num">${fmt(Number(r.dp)||0)}</td>
+      <td class="num">${fmt(Number(r.full)||0)}</td>
+      <td class="num">${fmt(ns)}</td>
+    </tr>`;
+  });
+  if(!clientRows) clientRows='<tr><td colspan="8" style="text-align:center;color:#888">No records</td></tr>';
+
+  /* ── Expense rows ── */
+  let expRows='';
+  expenses.forEach(r=>{
+    expRows+=`<tr>
+      <td>${esc(r.date||'—')}</td>
+      <td>${esc(r.supplier||'—')}</td>
+      <td>${esc(r.desc||'—')}</td>
+      <td class="num">${fmt(Number(r.amount)||0)}</td>
+    </tr>`;
+  });
+  if(!expRows) expRows='<tr><td colspan="4" style="text-align:center;color:#888">No records</td></tr>';
+
+  /* ── Debt rows ── */
+  let debtRows='';
+  debts.forEach(r=>{
+    const rb=remBal(r);
+    debtRows+=`<tr>
+      <td>${esc(r.date||'—')}</td>
+      <td>${esc(r.creditor||'—')}</td>
+      <td class="num">${fmt(Number(r.totalDebt)||0)}</td>
+      <td class="num">${fmt(Number(r.paid)||0)}</td>
+      <td class="num" style="color:${rb>0?'#b91c1c':'#1a5e2a'}">${fmt(rb)}</td>
+    </tr>`;
+  });
+  if(!debtRows) debtRows='<tr><td colspan="5" style="text-align:center;color:#888">No records</td></tr>';
+
+  /* ── Supplier rows ── */
+  let supRows='';
+  suppliers.forEach(sup=>{
+    const paid=paidForSupplier(sup.name);
+    const rem=supRemBal(sup);
+    const pct=Number(sup.totalDebt)>0?Math.min(100,Math.round(paid/Number(sup.totalDebt)*100)):0;
+    supRows+=`<tr>
+      <td style="font-weight:600">${esc(sup.name||'—')}</td>
+      <td class="num">${fmt(Number(sup.totalDebt)||0)}</td>
+      <td class="num">${fmt(paid)} (${pct}%)</td>
+      <td class="num" style="color:${rem===0?'#1a5e2a':'#b91c1c'}">${fmt(rem)}</td>
+    </tr>`;
+  });
+  if(!supRows) supRows='<tr><td colspan="4" style="text-align:center;color:#888">No records</td></tr>';
+
+  /* ── Payment History rows ── */
+  let payRows='';
+  const sortedPay=[...payments].sort((a,b)=>a.date<b.date?1:-1);
+  sortedPay.forEach(p=>{
+    payRows+=`<tr>
+      <td>${esc(p.date||'—')}</td>
+      <td>${esc(p.supplier||'—')}</td>
+      <td class="num">${fmt(Number(p.amount)||0)}</td>
+      <td>${esc(p.ref||'—')}</td>
+    </tr>`;
+  });
+  if(!payRows) payRows='<tr><td colspan="4" style="text-align:center;color:#888">No records</td></tr>';
+
+  /* ── Summary numbers ── */
+  const sales=totalSales(), exps=totalExp(), flow=sales-exps;
+  const totalDebtAll=debts.reduce((s,r)=>s+(Number(r.totalDebt)||0),0);
+  const totalPaidAll=debts.reduce((s,r)=>s+(Number(r.paid)||0),0);
+  const remAll=totalRem();
+  const supOutstanding=totalSupDebt();
+  const activeCl=activeClientCount();
+  const lvPct=loyalVipPct(meta);
+
+  document.getElementById('print-view').innerHTML=`
+  <div class="pv-brand">EllazoMonitor Pro</div>
+  <div class="pv-title">Monthly Business Report</div>
+  <div class="pv-meta">
+    <div>Month: <span>${mo}</span></div>
+    <div>Year: <span>${yr}</span></div>
+    <div>Printed: <span>${now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</span></div>
+  </div>
+
+  <!-- CLIENT SALES -->
+  <div class="pv-section-title">Client Sales</div>
+  <table class="pv-table">
+    <thead><tr>
+      <th>Date</th><th>Client Name</th><th>Client ID</th><th>Loyalty</th><th>Project</th>
+      <th>DP (₱)</th><th>Full Pay (₱)</th><th>Net Sales (₱)</th>
+    </tr></thead>
+    <tbody>${clientRows}</tbody>
+    <tfoot><tr class="total-row">
+      <td colspan="7">Total Net Sales</td>
+      <td class="num">${fmt(sales)}</td>
+    </tr></tfoot>
+  </table>
+
+  <!-- EXPENSES -->
+  <div class="pv-section-title">Expenses</div>
+  <table class="pv-table">
+    <thead><tr>
+      <th>Date</th><th>Supplier / Category</th><th>Description</th><th>Amount Paid (₱)</th>
+    </tr></thead>
+    <tbody>${expRows}</tbody>
+    <tfoot><tr class="total-row">
+      <td colspan="3">Grand Total</td>
+      <td class="num">${fmt(exps)}</td>
+    </tr></tfoot>
+  </table>
+
+  <!-- DEBTS -->
+  <div class="pv-section-title">Debt Repayment</div>
+  <table class="pv-table">
+    <thead><tr>
+      <th>Date</th><th>Creditor</th><th>Total Debt (₱)</th><th>Paid (₱)</th><th>Remaining (₱)</th>
+    </tr></thead>
+    <tbody>${debtRows}</tbody>
+    <tfoot><tr class="total-row">
+      <td colspan="4">Total Remaining Balance</td>
+      <td class="num" style="color:#b91c1c">${fmt(remAll)}</td>
+    </tr></tfoot>
+  </table>
+
+  <!-- SUMMARY -->
+  <div class="pv-summary-row">
+    <div class="pv-sum-box">
+      <div class="pv-sum-head">Business Summary</div>
+      <div class="pv-sum-row"><span>Total Sales</span><span class="val">${fmt(sales)}</span></div>
+      <div class="pv-sum-row"><span>Total Expenses</span><span class="val-r">${fmt(exps)}</span></div>
+      <div class="pv-sum-row"><span>Net Cash Flow</span><span class="${flow>=0?'val':'val-r'}">${fmt(flow)}</span></div>
+      <div class="pv-sum-row"><span>Active Clients (90 days)</span><span class="val">${activeCl}</span></div>
+      <div class="pv-sum-row"><span>Loyal / VIP %</span><span class="val">${lvPct}%</span></div>
+    </div>
+    <div class="pv-sum-box">
+      <div class="pv-sum-head">Debt Overview</div>
+      <div class="pv-sum-row"><span>Total Debt</span><span class="val-r">${fmt(totalDebtAll)}</span></div>
+      <div class="pv-sum-row"><span>Total Paid</span><span class="val">${fmt(totalPaidAll)}</span></div>
+      <div class="pv-sum-row"><span>Remaining Balance</span><span class="val-r">${fmt(remAll)}</span></div>
+      <div class="pv-sum-row"><span>&nbsp;</span><span></span></div>
+      <div class="pv-sum-row"><span>&nbsp;</span><span></span></div>
+    </div>
+  </div>
+
+  <!-- SUPPLIER PAYMENTS -->
+  <div class="pv-section-title">Supplier Payments — What I Owe</div>
+  <table class="pv-table">
+    <thead><tr>
+      <th>Supplier Name</th><th>Total Debt (₱)</th><th>Paid So Far</th><th>Remaining (₱)</th>
+    </tr></thead>
+    <tbody>${supRows}</tbody>
+    <tfoot><tr class="total-row">
+      <td colspan="3">Total Outstanding Supplier Debt</td>
+      <td class="num" style="color:#b91c1c">${fmt(supOutstanding)}</td>
+    </tr></tfoot>
+  </table>
+
+  <div class="pv-section-title">Supplier Payment History</div>
+  <table class="pv-table">
+    <thead><tr>
+      <th>Date</th><th>Supplier Name</th><th>Payment Amount (₱)</th><th>Reference/Notes</th>
+    </tr></thead>
+    <tbody>${payRows}</tbody>
+    <tfoot><tr class="total-row">
+      <td colspan="2">Total Payments Made</td>
+      <td class="num">${fmt(payments.reduce((s,p)=>s+(Number(p.amount)||0),0))}</td>
+      <td></td>
+    </tr></tfoot>
+  </table>
+
+  <div class="pv-footer">EllazoMonitor Pro &nbsp;|&nbsp; Auto-generated business report &nbsp;|&nbsp; ${now.toLocaleString()}</div>
+  `;
+}
+
+document.getElementById('btn-print').addEventListener('click',()=>{
+  buildPrintView();
+  window.print();
+});
+document.getElementById('btn-reset').addEventListener('click',()=>{
+  if(!confirm('Reset ALL data to defaults?\nThis cannot be undone.')) return;
+  clients   =JSON.parse(JSON.stringify(DEF_CLIENTS));
+  expenses  =JSON.parse(JSON.stringify(DEF_EXPENSES));
+  debts     =JSON.parse(JSON.stringify(DEF_DEBTS));
+  suppliers =JSON.parse(JSON.stringify(DEF_SUPPLIERS));
+  payments  =JSON.parse(JSON.stringify(DEF_PAYMENTS));
+  dbSave(); renderClients(); renderExpenses(); renderDebts();
+  renderSuppliers(); renderPayments(); refreshDashboard();
+  showToast('Data reset to defaults');
+});
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+initCharts();
+initClientCharts();
+renderClients();
+renderExpenses();
+renderDebts();
+renderSuppliers();
+renderPayments();
+refreshDashboard();
+</script>
+</body>
+</html>
